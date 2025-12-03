@@ -12,7 +12,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install Dependencies
         run: |
@@ -20,23 +20,28 @@ jobs:
           npm install @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Initialize Capacitor
-        run: npx cap init PocketMoney com.pocketmoney.app --web-dir=dist
+        # We use || true so it doesn't stop if you already initialized it
+        run: npx cap init PocketMoney com.pocketmoney.app --web-dir=dist || true
 
       - name: Build Web App
         run: npm run build
 
-      - name: Add Android Platform
-        run: npx cap add android
+      - name: Setup Android Platform
+        # CRITICAL FIX: Forces 'sync' to create the missing gradle files
+        run: |
+          npx cap add android || true
+          npx cap sync android
 
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          distribution: "zulu"
+          java-version: "17"
 
       - name: Build Debug APK
         run: |
           cd android
+          chmod +x gradlew  # Fixes permission denied errors
           ./gradlew assembleDebug
 
       - name: Upload APK
