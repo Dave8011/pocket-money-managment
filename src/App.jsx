@@ -19,6 +19,8 @@ import {
   Download,
   LogOut,
   User,
+  Eye,
+  EyeOff, // Import Eye icons for password toggle
 } from "lucide-react";
 import {
   PieChart,
@@ -64,11 +66,10 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app); // Analytics added
+const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Use a default app ID for storing data
 const appId = "pocketmoney-app-v1";
 
 // --- UTILITY COMPONENTS ---
@@ -114,6 +115,9 @@ const AuthScreen = () => {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // STATE FOR PASSWORD VISIBILITY
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -185,17 +189,32 @@ const AuthScreen = () => {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div>
+
+            {/* PASSWORD FIELD WITH TOGGLE */}
+            <div className="relative">
               <label className="text-xs font-bold text-slate-500 uppercase">
                 Password
               </label>
-              <input
-                required
-                type="password"
-                className="w-full p-3 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-100"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="relative">
+                <input
+                  required
+                  type={showPassword ? "text" : "password"}
+                  className="w-full p-3 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 pr-10"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 z-10"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <Button className="w-full mt-4" disabled={loading}>
