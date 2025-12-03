@@ -12,12 +12,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install Dependencies
         run: |
           npm install
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          # FIX: Pin Capacitor to version 6 to avoid Android API 35 (Vanilla Ice Cream) errors
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
 
       - name: Initialize Capacitor
         # We use || true so it doesn't stop if you already initialized it
@@ -41,8 +42,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
-          java-version: '21'
+          distribution: "zulu"
+          java-version: "17" # Downgraded to 17 for stability with Capacitor 6
 
       - name: Build Debug APK
         run: |
