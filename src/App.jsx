@@ -424,9 +424,9 @@ const Modal = ({ type, close, save, initialData }) => {
     e.preventDefault();
     save({
       ...data,
-      amount: parseFloat(data.amount),
-      totalAmount: parseFloat(data.totalAmount),
-      emiAmount: parseFloat(data.emiAmount),
+      amount: parseFloat(data.amount || 0), // Prevent NaN
+      totalAmount: parseFloat(data.totalAmount || 0),
+      emiAmount: parseFloat(data.emiAmount || 0),
     });
   };
 
@@ -854,50 +854,53 @@ export default function App() {
   }, [bills, loans, dues]);
 
   // --- NOTIFICATION LOGIC (Optional) ---
-  /*
+
   useEffect(() => {
     const checkAndNotify = async () => {
-        if(pendingPayments.length > 0) {
-            try {
-                const perm = await LocalNotifications.requestPermissions();
-                if(perm.display === 'granted') {
-                    const today = new Date().toISOString().split('T')[0];
-                    const lastNotified = localStorage.getItem('last_notified');
-                    
-                    if (lastNotified !== today) {
-                        await LocalNotifications.schedule({
-                            notifications: [{
-                                title: "Payments Due",
-                                body: `You have ${pendingPayments.length} pending payments.`,
-                                id: 1,
-                                schedule: { at: new Date(Date.now() + 5000) }
-                            }]
-                        });
-                        localStorage.setItem('last_notified', today);
-                    }
-                }
-            } catch (e) { console.log("Notif error"); }
+      if (pendingPayments.length > 0) {
+        try {
+          const perm = await LocalNotifications.requestPermissions();
+          if (perm.display === "granted") {
+            const today = new Date().toISOString().split("T")[0];
+            const lastNotified = localStorage.getItem("last_notified");
+
+            if (lastNotified !== today) {
+              await LocalNotifications.schedule({
+                notifications: [
+                  {
+                    title: "Payments Due",
+                    body: `You have ${pendingPayments.length} pending payments.`,
+                    id: 1,
+                    schedule: { at: new Date(Date.now() + 5000) },
+                  },
+                ],
+              });
+              localStorage.setItem("last_notified", today);
+            }
+          }
+        } catch (e) {
+          console.log("Notif error");
         }
+      }
     };
     checkAndNotify();
   }, [pendingPayments.length]);
-  */
 
   const currentMonthTxns = transactions.filter((t) => {
     const d = new Date(t.date);
     return d.getMonth() === currentMonthIdx && d.getFullYear() === currentYear;
   });
   const totalIncome = transactions.reduce(
-    (acc, t) => (t.type === "income" ? acc + t.amount : 0),
+    (acc, t) => (t.type === "income" ? acc + t.amount : acc),
     0
   );
   const totalExpense = transactions.reduce(
-    (acc, t) => (t.type === "expense" ? acc + t.amount : 0),
+    (acc, t) => (t.type === "expense" ? acc + t.amount : acc),
     0
   );
   const walletBalance = totalIncome - totalExpense;
   const monthIncome = currentMonthTxns.reduce(
-    (acc, t) => (t.type === "income" ? acc + t.amount : 0),
+    (acc, t) => (t.type === "income" ? acc + t.amount : acc),
     0
   );
   const totalCommitments = pendingPayments.reduce(
@@ -1190,7 +1193,9 @@ export default function App() {
                         <List className="w-3 h-3 text-white" />
                       </div>
                       <div>
-                        <p className="text-[10px] text-blue-200">Misc Left</p>
+                        <p className="text-[10px] text-blue-200">
+                          Miscellaneous Exp.. Left
+                        </p>
                         <p className="text-sm font-bold">
                           {formatCurrency(miscBalance)}
                         </p>
@@ -1334,7 +1339,7 @@ export default function App() {
             <Card className="p-4">
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2 font-bold text-slate-700">
-                  <List className="w-4 h-4" /> Misc. Budget
+                  <List className="w-4 h-4" /> Miscellaneous Budget
                 </div>
                 <button
                   onClick={() => {
