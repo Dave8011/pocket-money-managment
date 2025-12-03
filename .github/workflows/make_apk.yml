@@ -12,7 +12,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: '18'
 
       - name: Install Dependencies
         run: |
@@ -24,7 +24,13 @@ jobs:
         run: npx cap init PocketMoney com.pocketmoney.app --web-dir=dist || true
 
       - name: Build Web App
-        run: npm run build
+        run: |
+          npm run build
+          # FIX: Check if React created 'build' instead of 'dist' and rename it
+          if [ ! -d "dist" ] && [ -d "build" ]; then
+            echo "Renaming 'build' directory to 'dist' for Capacitor..."
+            mv build dist
+          fi
 
       - name: Setup Android Platform
         # CRITICAL FIX: Forces 'sync' to create the missing gradle files
@@ -35,8 +41,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: "zulu"
-          java-version: "17"
+          distribution: 'zulu'
+          java-version: '17'
 
       - name: Build Debug APK
         run: |
