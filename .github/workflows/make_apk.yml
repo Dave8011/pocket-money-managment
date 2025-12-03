@@ -1,0 +1,46 @@
+name: Build Shareable APK
+
+on:
+  workflow_dispatch: # This allows you to click a button to build it manually
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: |
+          npm install
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Initialize Capacitor
+        run: npx cap init PocketMoney com.pocketmoney.app --web-dir=dist
+
+      - name: Build Web App
+        run: npm run build
+
+      - name: Add Android Platform
+        run: npx cap add android
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Build Debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-money-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
